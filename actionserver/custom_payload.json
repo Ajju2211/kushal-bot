@@ -1,0 +1,123 @@
+{
+    "restaurant": {
+        "name": "Azhar",
+        "id": "1234nkjsdn",
+        "city": "Hyderabad",
+        "menu_imgs": [
+            "https://image.freepik.com/free-vector/taco-food-restaurant-menu-template_23-2148595758.jpg",
+            "https://image.freepik.com/free-vector/restaurant-menu-template-design_23-2148404703.jpg"
+        ],
+        "menu": {
+            "vegetables": [
+                {
+                    "dish": "Potato",
+                    "price": [
+                        { 
+                            "unit": "GMS",
+                            "cost": 25,
+                            "quantity": 500
+                        },
+                        {
+                            "unit": "KG",
+                            "cost": 38,
+                            "quantity": 1
+                        }
+                    ],
+                    "image": "https://res.cloudinary.com/demo/image/upload/w_1000,h_1000,c_limit/cashew_chicken.jpg"
+                },
+                {
+                    "dish": "Gaajar",
+                    "price": [
+                        {
+                            "unit": "GMS",
+                            "cost": 20,
+                            "quantity": 500
+                        },
+                        {
+                            "unit": "KG",
+                            "cost": 29,
+                            "quantity": 1
+                        },
+                        {
+                            "unit": "GMS",
+                            "cost": 10,
+                            "quantity": 250
+                        }
+                    ],
+                    "image": "https://res.cloudinary.com/demo/image/upload/w_1000,h_1000,c_limit/cashew_chicken.jpg"
+                },
+                {
+                    "item": "Flower",
+                    "price": [
+                        {
+                            "unit": "GMS",
+                            "cost": 50,
+                            "quantity": 500
+                        },
+                        {
+                            "unit": "KG",
+                            "cost": 90,
+                            "quantity": 1
+                        },
+                        {
+                            "unit": "GMS",
+                            "cost": 25,
+                            "quantity": 250
+                        }
+                    ],
+                    "image": "https://res.cloudinary.com/demo/image/upload/w_1000,h_1000,c_limit/cashew_chicken.jpg"
+                }
+            ],
+            "fruits": [
+                {
+                    "item": "Apple Indian",
+                    "price": [
+                        {
+                            "unit": "GMS",
+                            "cost": 65,
+                            "quantity": 500
+                        },
+                        {
+                            "unit": "KG",
+                            "cost": 110,
+                            "quantity": 1
+                        },
+                        {
+                            "unit": "GMS",
+                            "cost": 35,
+                            "quantity": 250
+                        }
+                    ],
+                    "image": "https://res.cloudinary.com/demo/image/upload/w_1000,h_1000,c_limit/cashew_chicken.jpg"
+                },
+                {
+                    "item": "Banana",
+                    "price": [
+                        {
+                            "unit": "PCS",
+                            "cost": 20,
+                            "quantity": 6
+                        }
+                    ],
+                    "image": "https://res.cloudinary.com/demo/image/upload/w_1000,h_1000,c_limit/cashew_chicken.jpg"
+                },
+                {
+                    "item": "Kiwi",
+                    "price": [
+                        {
+                            "unit": "PCS",
+                            "cost": 120,
+                            "quantity": 4
+                        }
+                    ],
+                    "image": "https://res.cloudinary.com/demo/image/upload/w_1000,h_1000,c_limit/cashew_chicken.jpg"
+                }
+            ]
+        }
+    },
+    "user": {
+        "name": "Abhishek",
+        "id": "juhsudhuhbjb",
+        "gender": "M"
+    }
+}
