@@ -11,9 +11,11 @@ from rasa.core.slots import Slot
 import json
 from actionserver.utils import utilities as util
 from actionserver.controllers.faqs.faq import FAQ
+from actionserver.controllers.regexPatterns import *
 import logging
 import secrets
-
+import traceback
+import re
 
 dish_list = []
 quant_list = []  # takes quantity from user
@@ -152,6 +154,190 @@ class InfoForm(FormAction):
         return []
 
 
+class UserInfoForm(FormAction):
+
+    """Collects order information"""
+
+    def name(self):
+        return "user_info_form"
+
+    @staticmethod
+    def required_slots(tracker):
+        if tracker.get_slot("area"):
+            return ["confirm"]
+        elif tracker.get_slot("phone_number"):
+            return ["area"]
+        elif tracker.get_slot("mailid"):
+            return ["phone_number"]
+        elif tracker.get_slot("username"):
+            return ["mailid"]
+        else:
+            return ["username"]
+
+        return [
+            "username",
+            "mailid",
+            "phone_number",
+            "area",
+            "confirm"
+        ]
+
+    def slot_mappings(self) -> Dict[Text, Union[Dict, List[Dict]]]:
+        return {"username": self.from_text(), "mailid": [self.from_entity("email"), self.from_text()],
+                "phone_number": [self.from_entity("ind_num"), self.from_text()],
+                "area": [self.from_entity("area"), self.from_text()],
+                "confirm": [self.from_entity("confirm"), self.from_text()]}
+
+    def validate_username(
+        self,
+        value: Text,
+        dispatcher: "CollectingDispatcher",
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> Dict[Text, Any]:
+        if value:
+            return {"username": value, REQUESTED_SLOT: "mailid"}
+        else:
+            dispatcher.utter_message(text="something happened,re type..")
+            return {"username": None, REQUESTED_SLOT: "username"}
+
+    def validate_mailid(
+        self,
+        value: Text,
+        dispatcher: "CollectingDispatcher",
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> Dict[Text, Any]:
+        print("email: ",value)
+        if value:
+            if value.lower() == "back":
+                return {"mailid": None, "username": None, REQUESTED_SLOT: "username"}
+            else:
+                match = re.search(pattern=EMAIL_PATTERN, string=value.strip())
+                if match:
+                    # entity = {
+                    # "start": match.pos,
+                    # "end": match.endpos,
+                    # "value": match.group(),
+                    # "confidence": 1.0,
+                    # "entity": d['name'],
+                    #     }
+                    return {"mailid": match.group(), REQUESTED_SLOT: "phone_number"}
+                else:
+                    dispatcher.utter_message(
+                        text="Can you please enter valid email!")
+                    return {"mailid": None, REQUESTED_SLOT: "mailid"}
+        else:
+            dispatcher.utter_message(text="Can you please enter valid email!")
+            return {"mailid": None, REQUESTED_SLOT: "mailid"}
+
+    def validate_phone_number(
+        self,
+        value: Text,
+        dispatcher: "CollectingDispatcher",
+        tracker: "Tracker",
+        domain: Dict[Text, Any],
+    ) -> Dict[Text, Any]:
+        if value:
+            if value.lower() == "back":
+                return {"phone_number": None, "mailid": None, REQUESTED_SLOT: "mailid"}
+            else:
+                match = re.search(pattern=IND_NUM_PATTERN,
+                                  string=value.strip())
+                if match:
+                    return {"phone_number": match.group(), REQUESTED_SLOT: "area"}
+                else:
+                    dispatcher.utter_message(
+                        text="Please enter valid indian numbers only")
+                    return {"phone_number": None, REQUESTED_SLOT: "phone_number"}
+        else:
+            dispatcher.utter_message(
+                text="Please enter valid indian numbers only")
+            return {"phone_number": None, REQUESTED_SLOT: "phone_number"}
+
+    def validate_area(
+        self,
+        value: Text,
+        dispatcher: "CollectingDispatcher",
+        tracker: "Tracker",
+        domain: Dict[Text, Any],
+    ) -> Dict[Text, Any]:
+        print("areas: ",value)
+        if value:
+            areas = ["thane","csmt","mulund","matunga"]
+            if value.lower() == "back":
+                return {"area": None, "phone_number": None, REQUESTED_SLOT: "phone_number"}
+            elif value.lower in areas:
+                return {"area": value, REQUESTED_SLOT: "confirm"}
+            elif value.lower() == "exit":
+                return {"area": "EXIT", "confirm": INVALID_VALUE,REQUESTED_SLOT:None}
+            else:
+                exit_button = [
+                    {
+                    "title":"Exit",
+                    "payload":"/inform{\"area\":\"EXIT\"}"
+                }]
+                dispatcher.utter_message(text="Currently we serve only in areas like Thane|CSMT|Mulund|Matunga of mumbai",buttons=exit_button)
+                return {"area": None, REQUESTED_SLOT:"area"}
+        else:
+            return {"area": None, REQUESTED_SLOT:"area"}
+
+    def validate_confirm(
+        self,
+        value: Text,
+        dispatcher: "CollectingDispatcher",
+        tracker: "Tracker",
+        domain: Dict[Text, Any],
+    ) -> Dict[Text, Any]:
+        if value:
+            confirm = ["yes", "confirm", "s", "sure"]
+            cancel = ["no", "cancel", "not", "remove", "nope"]
+            if value.lower() == "back":
+                return {"confirm": None, "phone_number": None, REQUESTED_SLOT: "phone_number"}
+            elif value.lower() in confirm:
+                return {"confirm": "YES"}
+            elif value.lower() in cancel:
+                return {"confirm": "NO"}
+            else:
+                dispatcher.utter_message(
+                    text="Please enter valid option")
+                return {"confirm": None, REQUESTED_SLOT: "confirm"}
+        else:
+            dispatcher.utter_message(text="please say yes or no!")
+            return {"confirm": None, REQUESTED_SLOT: "confirm"}
+
+    def submit(
+        self,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: Dict[Text, Any],
+    ) -> List[Dict]:
+        confirm = tracker.get_slot("confirm")
+        area = tracker.get_slot("area")
+        if area == "EXIT":
+            dispatcher.utter_message(
+                "Thanks for visiting Kushal's Veggie Mart")
+            return []
+        if confirm == "YES":
+            dispatcher.utter_message(
+                "Thanks for Ordering!, your order is on the way")
+            return []
+        if confirm == "NO":
+            dispatcher.utter_message("Your order has been cancelled !!")
+            dispatcher.utter_message(
+                "Thanks for visiting Kushal's Veggie Mart")
+            return []
+        # username = tracker.get_slot("username")
+        # mailid = tracker.get_slot("mailid")
+        # phone_number = tracker.get_slot("phone_number")
+
+        # message = "DETAILS:"+"\n\n"+"Name:"+username+"\n"+"Email:"+mailid+"\n" + \
+        #     "Phone Number:"+phone_number+"\n"+"\nThanks! for sharing information."
+        # saveFile = open("some.txt", 'a')
+        # saveFile.write(message)
+        # saveFile.close()
+
+
 class ActionShowMenu(Action):
     def name(self) -> Text:
         return "action_show_menu"
@@ -164,7 +350,7 @@ class ActionShowMenu(Action):
         data_restaurant = data['restaurant']
         for i in data['restaurant']['menu_imgs']:
             url = str(i)
-            dispatcher.utter_message("Menu of that restaurant is ")
+            dispatcher.utter_message("Menu of the Kushal's Veggie is ")
             dispatcher.utter_message(image=url)
         return []
 
@@ -200,18 +386,21 @@ class OrderForm(FormAction):
             return [
                 "proceed"
             ]
-        elif tracker.get_slot("dish_category"):
+        elif tracker.get_slot("dish_name"):
             return [
-                "dish_name",
                 "quantity",
                 "proceed"
             ]
+        elif tracker.get_slot("dish_category"):
+            return [
+                "dish_name"
+            ]
         else:
             return [
-                "dish_category",
-                "dish_name",
-                "quantity",
-                "proceed"
+                "dish_category"
+                # "dish_name",
+                # "quantity",
+                # "proceed"
             ]
 
     def slot_mappings(self) -> Dict[Text, Union[Dict, List[Dict]]]:
@@ -243,20 +432,25 @@ class OrderForm(FormAction):
             if self._should_request_slot(tracker, slot):
                 logger.debug(f"Request next slot '{slot}'")
                 if slot == "dish_category":
-                    dispatcher.utter_message(text="Please select the category")
+                    # dispatcher.utter_message(text="Please select the category")
                     button_resp = [
                         {
-                            "title": "back",
+                            "title": "Back",
                             "payload": '/inform{"dish_category":"back"}'
                         }
                     ]
-                    dispatcher.utter_message(
-                        text="type back otherwise!", 
-                        buttons=button_resp)
+                    # dispatcher.utter_message(
+                    #     buttons=button_resp)
                     self.askCategories(dispatcher)
                 elif slot == "quantity":
-                    dispatcher.utter_message(text="Please select quantity")
-                    self.askQuantity(dispatcher,tracker)
+                    button_resp = [
+                        {
+                            "title": "Back",
+                            "payload": '/inform{"quantity":"back"}'
+                        }
+                    ]
+                    dispatcher.utter_message(buttons=button_resp)
+                    self.askQuantity(dispatcher, tracker)
                 else:
                     dispatcher.utter_message(
                         template=f"utter_ask_{slot}", **tracker.slots)
@@ -274,43 +468,43 @@ class OrderForm(FormAction):
             data.append(cat)
 
         message = {"payload": "dropDown", "data": data}
+        button_resp = [
+            {
+                "title": "back",
+                "payload": '/inform{"dish_category":"back"}'
+            }
+        ]
+        # dispatcher.utter_message(buttons=button_resp)
 
         dispatcher.utter_message(
-            text="Please select a option", json_message=message)
+            text="Please select a option", json_message=message, buttons=button_resp)
     # To display dishes of category
 
-    def askQuantity(self, dispatcher,tracker):
+    def askQuantity(self, dispatcher, tracker):
         dish_name = tracker.get_slot("dish_name")
+        print('dish_name in askQuantity', dish_name)
         dish_category = tracker.get_slot("dish_category")
         data = []
-        for cat in restaurant_menu['restaurant']['menu'][dish_category]:
-            for items in cat:
-                if items['dish'] == dish_name:
-
-                    for price in items['price']:
-                        label = price['cost'] + '₹' + '/' + price['quantity'] + price['unit']
-                        value = str(price)
-                        ct = {
-                            "label":f"{label}",
-                            "value": '/inform{\"dish_category\":'+value+'}'
-                        }
-                        data.append(ct)  
-
-            # val = '\"{}\"'.format(keys)
-            # cat = {"label": f"{keys}",
-            #        "value": '/inform{\"dish_category\":'+val+'}'}
-            # data.append(cat)
-
-        message = {"payload": "dropDown", "data": data}
-
+        for item in restaurant_menu['restaurant']['menu'][dish_category]:
+            if item['dish'].lower() == dish_name.lower():
+                for price in item['price']:
+                    label = str(price['cost']) + '₹' + '/' + \
+                        str(price['quantity']) + str(price['unit'])
+                    value = json.dumps(price)
+                    print("strof priceObj ", value)
+                    ct = {
+                        "label": f"{label}",
+                        "value": '/inform{\"quantity\":'+value+'}'
+                    }
+                    data.append(ct)
+                message = {"payload": "dropDown", "data": data}
         dispatcher.utter_message(
             text="Please select a option", json_message=message)
-    
 
     def showDishes(self, category, dispatcher, tracker):
         dic = {}
         data = []
-        print(f"cat:{category}")
+        print(f"cat-received:{category}")
         try:
             if restaurant_menu['restaurant']['menu'][category]:
                 temp = restaurant_menu['restaurant']['menu'][category]
@@ -318,16 +512,15 @@ class OrderForm(FormAction):
                     Price = ""
                     Quant = ""
                     for i in j['price']:
-                        Price+= i['cost'] + ' ' + '/' + i['quantity'] + ' ' + i['unit']+","
-                        Quant += '/' + i['unit']+","
+                        Price += str(i['cost']) + '₹' + '/' + \
+                            str(i['quantity']) + '' + str(i['unit'])+','
+                        Quant += '/' + str(i['unit'])+','
                     dic = {
                         "title": j['dish'],
                         "price": Price,
                         "image": j['image'],
-                        "quantity":Quant,
+                        "quantity": Quant,
                     }
-                    # 10 /6 PCS , 20 / 500 GMS, 30 /
-                    
 
                     data.append(dic)
 
@@ -338,8 +531,9 @@ class OrderForm(FormAction):
 
             # return {"dish_category": category}
 
-        except:
+        except Exception as e:
             dispatcher.utter_message(text="No such Category Found")
+            traceback.print_exc()
             raise Exception("No such Category")
             # return {"dish_category":None}
 
@@ -347,11 +541,14 @@ class OrderForm(FormAction):
         data = []
         for x in dish_list:
             image = util.dish_info(x['dish'], x['category'])['image']
-            price = util.dish_info(x['dish'], x['category'])['price']
+            # price = util.dish_info(x['dish'], x['category'])['price']
+            price = str(x['cost'])+"₹"
+
+            qty = str(x['quantity']['quantity'])+str(x['quantity']['unit'])
             cart = {
                 "title": x['dish'],
                 "image": image,
-                "quantity": x['quantity'],
+                "quantity": qty,
                 "price": price
             }
 
@@ -387,14 +584,15 @@ class OrderForm(FormAction):
                         }
                     ]
 
-                    dispatcher.utter_message(text="type back otherwise!", buttons=button_resp)
-                    
+                    # dispatcher.utter_message(text="type back otherwise!", buttons=button_resp)
+
                     self.showDishes(category, dispatcher, tracker)
                     return {"dish_category": category}
-                except:
+                except Exception as e:
+                    print(e)
                     return {"dish_category": None}
         else:
-            return {"dish_category": None}
+            return [SlotSet("dish_category", None), SlotSet(REQUESTED_SLOT, "dish_category")]
 
         # message={"payload":"cartCarousels","data":data}
 
@@ -431,8 +629,10 @@ class OrderForm(FormAction):
                     temp = menu[category]
                     for j in temp:
                         if dish_name.lower() == j['dish'].lower():
-                            dispatcher.utter_message(
-                                "it costs {}".format(j['price']))
+                            price = ""
+                            for p in j['price']:
+                                price += f'{p["cost"]} ₹ per {p["quantity"]} {p["unit"]} \n'
+                            dispatcher.utter_message(text=price)
                             return {"dish_name": dish_name}
                         else:
                             continue
@@ -458,7 +658,7 @@ class OrderForm(FormAction):
         domain: Dict[Text, Any],
     ) -> Dict[Text, Any]:
         dish_name = tracker.get_slot("dish_name")
-        
+
         try:
             quantity = tracker.get_slot("quantity")
             return {"dish_name": dish_name, "quantity": quantity}
@@ -475,17 +675,20 @@ class OrderForm(FormAction):
     ) -> Dict[Text, Any]:
         dish_name = tracker.get_slot("dish_name")
         proceed = tracker.get_slot("proceed")
-        quant = json.loads(tracker.get_slot("quantity"))
+        # quant = json.loads(tracker.get_slot("quantity"))
+        quant = tracker.get_slot("quantity")
         cat = tracker.get_slot("dish_category")
         if proceed == "Add to Cart":
-            dish_obj = {"dish": dish_name, "quantity": quant,"cost":quant['cost'], "category": cat}
+            dish_obj = {"dish": dish_name, "quantity": quant,
+                        "cost": quant['cost'], "category": cat}
             dish_list.append(dish_obj)
             self.showDishes(cat, dispatcher, tracker)
             print("quantity")
             return {"proceed": None, "dish_name": None, "quantity": None}
 
         elif proceed == "Buy Now":
-            dish_obj = {"dish": dish_name, "quantity": quant, "cost":quant['cost'],"category": cat}
+            dish_obj = {"dish": dish_name, "quantity": quant,
+                        "cost": quant['cost'], "category": cat}
             dish_list.append(dish_obj)
             return {"proceed": proceed}
 
@@ -803,7 +1006,7 @@ class FaqForm(FormAction):
         else:
             dispatcher.utter_message(text="Please type valid option")
             return {
-                "faq_choice": None, 
+                "faq_choice": None,
                 REQUESTED_SLOT: "faq_choice"
             }
 

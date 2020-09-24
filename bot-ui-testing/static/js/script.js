@@ -358,7 +358,7 @@ function renderDropDwon(data) {
         // options += '<option value="' + data[i].value + '">' + data[i].label + '</option>'
         options += `<option value='${data[i].value}'>${data[i].label}</option>`;
     }
-    var select = '<div class="dropDownMsg"><select class="browser-default dropDownSelect"> <option value="" disabled selected>Choose your option</option>' + options + '</select></div>'
+    var select = '<div class="dropDownMsg" style="margin-top:80px;margin-bottom:10px"><select class="browser-default dropDownSelect"> <option value="" disabled selected>Choose your option</option>' + options + '</select></div>'
     $(".chats").append(select);
     scrollToBottomOfResults();
 
@@ -496,7 +496,7 @@ function showCartCardsCarousel(cardsToAdd) {
     $(cards).appendTo(".chats").show();
 
     // changing height of scroller
-    $(".cards_scroller").css("height","300px");
+    $(".cards_scroller").css("height","350px");
 
 
     if (cardsToAdd.length <= 2) {
@@ -543,7 +543,7 @@ function createCartCardsCarousel(cardsData) {
     <div class="card-image waves-effect waves-block waves-light" style="width:250px;height:110px">
       <img class="activator" src="${cardsData[i].image}">
     </div>
-    <div class="card-content" style="background-color:#582c2c40;">
+    <div class="card-content" style="background-color:#ffab91 !important;">
       <span class="card-title activator grey-text text-darken-4">${cardsData[i].title}<i class="material-icons right">more_vert</i></span>
       <table>
       <thead>
@@ -553,9 +553,9 @@ function createCartCardsCarousel(cardsData) {
       </tr>
       </thead>
       <tbody>
-      <tr style="font-size: 1.5em;font-style: normal;">
+      <tr style="font-size: 0.8em;font-style: normal;">
       <td>${cardsData[i].quantity}</td>
-      <td>${cardsData[i].price} ₹</td>
+      <td>${cardsData[i].price}</td>
       </tr>
       </tbody>
       </table>

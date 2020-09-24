@@ -4,6 +4,8 @@ actions:
   - utter_ask_username
   - utter_ask_mailid
   - utter_ask_phone_number
+  - utter_ask_area
+  - utter_ask_confirm
   - utter_ask_dish_name
   - utter_ask_proceed
   - utter_goodbye
@@ -18,8 +20,8 @@ actions:
   - utter_query_type
   - utter_ask_faq_choice
   - utter_ask_faq_text
-  - utter_ask_dish_category
   - action_greet_back
+  - utter_fill_user_info
 
 entities:
   - username
@@ -40,9 +42,12 @@ entities:
   - faq_choice
   - faq_text
   - navigator
+  - email
+  - ind_num
 
 forms:
   - info_form
+  - user_info_form
   - order_form
   - complain_form
   - feedback_form
@@ -66,7 +71,12 @@ intents:
   - question
   - navigations
   - greetback
+
 responses:
+  utter_fill_user_info:
+    -
+      text: "Thanks for ordering,fillout the details to complete your order"
+
   utter_ask_complain_text:
     -
       text: "Please Describe your complain."
@@ -97,12 +107,19 @@ responses:
     -
       buttons:
         -
-          payload: "/affirm{\"confirm\":\"back3\"}"
-          title: Back
+          payload: "/affirm{\"confirm\":\"YES\"}"
+          title: Confirm to place order
+        -
+          payload: "/affirm{\"confirm\":\"NO\"}"
+          title: Cancel
+        -
+          payload: "/affirm{\"confirm\":\"back\"}"
+          title: Back to edit
       text: "Please confirm your details:\n\
           \x20name: {username} \n\
           \x20Contact no.: {phone_number} \n\
-          \x20email: {mailid} "
+          \x20email: {mailid} \n\
+          \x20Area: {area} in Mumbai "
   utter_ask_dish_name:
     -
       text: "What food item would you like to eat?"
@@ -142,16 +159,36 @@ responses:
     -
       buttons:
         -
-          payload: "/inform{\"mailid\":\"back1\"}"
+          payload: "/inform{\"email\":\"back\"}"
           title: Back
       text: "Please enter your mail id."
   utter_ask_phone_number:
     -
       buttons:
         -
-          payload: "/inform{\"phone_number\":\"back2\"}"
+          payload: "/inform{\"ind_num\":\"back\"}"
           title: Back
-      text: "Please enter your phone number."
+      text: "Please enter your phone number(Only in india)."
+  utter_ask_area:
+    -
+      buttons:
+        -
+          payload: "/inform{\"area\":\"back\"}"
+          title: Back
+
+      text: "Tell us your locality in Mumbai."
+      custom:
+        payload: dropDown
+        data:
+        - label: Mulund
+          value: '/inform{\"area\":\"mulund\"}'
+        - label: Matunga
+          value: '/inform{\"area\":\"matunga\"}'
+        - label: CSMT
+          value: '/inform{\"area\":\"csmt\"}'
+        - label: Thane
+          value: '/inform{\"area\":\"thane\"}'
+
   utter_ask_proceed:
     -
       buttons:
@@ -267,5 +304,7 @@ slots:
   rating:
     type: unfeaturized
   username:
-    initial_value: John
+    # initial_value: John
+    type: unfeaturized
+  area:
     type: unfeaturized

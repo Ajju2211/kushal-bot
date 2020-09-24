@@ -1,6 +1,16 @@
 
 
-## order food path
+<!-- ## order food path
+*greet
+    -utter_greet
+*order_food
+    -action_show_menu
+	-order_form
+	-form{"name":"order_form"}
+	-form{"name":null} -->
+
+
+## order food path with user  info
 *greet
     -utter_greet
 *order_food
@@ -8,8 +18,10 @@
 	-order_form
 	-form{"name":"order_form"}
 	-form{"name":null}
-
-
+	-utter_fill_user_info
+	-user_info_form
+	-form{"name":"user_info_form"}
+	-form{"name":null}
     
 ## complaint path
 *greet

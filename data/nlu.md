@@ -97,6 +97,10 @@
 - \b[A-Z]{3}-\d{4}\b
 ## regex:transaction_id
 - \b\d{5}\b
+## regex:email
+- \b^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$\b
+## regex:ind_num
+- \b^[0-5][1-9]\d{9}$|^[1-9]\d{9}$\b
 ## regex:any_thing
 - @sys.any
 

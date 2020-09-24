@@ -4,8 +4,8 @@
         "id": "1234nkjsdn",
         "city": "Hyderabad",
         "menu_imgs": [
-            "https://image.freepik.com/free-vector/taco-food-restaurant-menu-template_23-2148595758.jpg",
-            "https://image.freepik.com/free-vector/restaurant-menu-template-design_23-2148404703.jpg"
+            "https://previews.123rf.com/images/seamartini/seamartini1911/seamartini191100489/134267096-vegetables-farm-market-veggies-and-organic-vegetarian-food-menu-price-list-vector-dollar-price-for-c.jpg",
+            "https://www.whistlerreservations.com/wp-content/uploads/bigstock-Organic-vegetables-on-a-stand-52118527-660x440.jpg"
         ],
         "menu": {
             "vegetables": [
@@ -47,7 +47,7 @@
                     "image": "https://res.cloudinary.com/demo/image/upload/w_1000,h_1000,c_limit/cashew_chicken.jpg"
                 },
                 {
-                    "item": "Flower",
+                    "dish": "Flower",
                     "price": [
                         {
                             "unit": "GMS",
@@ -70,7 +70,7 @@
             ],
             "fruits": [
                 {
-                    "item": "Apple Indian",
+                    "dish": "Apple Indian",
                     "price": [
                         {
                             "unit": "GMS",
@@ -91,7 +91,7 @@
                     "image": "https://res.cloudinary.com/demo/image/upload/w_1000,h_1000,c_limit/cashew_chicken.jpg"
                 },
                 {
-                    "item": "Banana",
+                    "dish": "Banana",
                     "price": [
                         {
                             "unit": "PCS",
@@ -102,7 +102,7 @@
                     "image": "https://res.cloudinary.com/demo/image/upload/w_1000,h_1000,c_limit/cashew_chicken.jpg"
                 },
                 {
-                    "item": "Kiwi",
+                    "dish": "Kiwi",
                     "price": [
                         {
                             "unit": "PCS",
