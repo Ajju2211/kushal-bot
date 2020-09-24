@@ -263,11 +263,13 @@ class UserInfoForm(FormAction):
         domain: Dict[Text, Any],
     ) -> Dict[Text, Any]:
         print("areas: ",value)
+        if tracker.get_slot("area"):
+            value=value
         if value:
             areas = ["thane","csmt","mulund","matunga"]
             if value.lower() == "back":
                 return {"area": None, "phone_number": None, REQUESTED_SLOT: "phone_number"}
-            elif value.lower in areas:
+            elif value.lower() in areas:
                 return {"area": value, REQUESTED_SLOT: "confirm"}
             elif value.lower() == "exit":
                 return {"area": "EXIT", "confirm": INVALID_VALUE,REQUESTED_SLOT:None}
@@ -317,16 +319,16 @@ class UserInfoForm(FormAction):
         if area == "EXIT":
             dispatcher.utter_message(
                 "Thanks for visiting Kushal's Veggie Mart")
-            return []
+            return [AllSlotsReset()]
         if confirm == "YES":
             dispatcher.utter_message(
                 "Thanks for Ordering!, your order is on the way")
-            return []
+            return [AllSlotsReset()]
         if confirm == "NO":
             dispatcher.utter_message("Your order has been cancelled !!")
             dispatcher.utter_message(
                 "Thanks for visiting Kushal's Veggie Mart")
-            return []
+            return [AllSlotsReset()]
         # username = tracker.get_slot("username")
         # mailid = tracker.get_slot("mailid")
         # phone_number = tracker.get_slot("phone_number")
